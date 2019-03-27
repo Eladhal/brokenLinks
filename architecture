@@ -1,0 +1,31 @@
+
+App Architecure
+
+App goal:
+Get a url from the user and return the number of broken links found in the 
+HTML page that relate to that url.
+
+App chalange:
+The operation of finding the number of HTML broken links can take some time,
+and if it is combined with many requests from users in parallel, it can lead the server to temporary overloading.
+
+Suggested architecture:
+Separate client requests service from the counting of broken links service 
+by using microservices architecture.
+
+steps :
+1) The main service get the requests from client through http protocol
+2) The main service performs 3 operation:
+  2.1) open web socket to the client
+  2.1) Save data to DB (fields: id, user, url, gotAnswer,brokenLinks) and  		 send respone to the client that data is saved. 
+  2.2) Send request through http to other service (calaculation service) 		 that perform the calculation and return the result.
+        * In case there are a lot of requests parallel , there is an option   	to create a few instances of that service and manage it with load 	  balancer.
+        * It is a possible to use rabbitMQueue/kafka instead of http to communicate between main service and the calaculation service
+
+ 3) After The main server get the result from the calcualtion service it     	will return the data to client through web socket and update DB that it   	 got answered.
+
+ 4) if the client browser is closed , the server will update in DB that the  	client didnt got answered , the next time the client will comunicate the 	server, it will answer him immediately with the data that saved in DB.
+
+
+
+
